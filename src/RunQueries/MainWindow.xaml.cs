@@ -186,5 +186,18 @@ namespace RunQueries
         {
             System.Diagnostics.Process.Start(_files[lbFiles.SelectedItem.ToString()]);
         }
+
+        private void lbFiles_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (lbFiles.Items.Count == 0)
+                return;
+
+            lbFiles.ToolTip = "Double click to open script in MSSM";
+        }
+
+        private void lbFiles_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            lbFiles.ToolTip = null;
+        }
     }
 }
