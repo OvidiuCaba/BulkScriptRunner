@@ -31,6 +31,7 @@ namespace RunQueries
 
         private Dictionary<string, string> _files;
         private Dictionary<string, bool> _filesStatus;
+        private Dictionary<string, string> _outputFiles;
 
         private string _currentCommandOutput;
 
@@ -112,13 +113,19 @@ namespace RunQueries
                 }
             }
 
-            var destinationFile = _files[fileName].Replace(fileName, $"{cbServer.SelectedValue}\\{fileName.Replace(".sql", ".txt")}");
+            var outputFile = _files[fileName].Replace(fileName, $"{cbServer.SelectedValue}\\{fileName.Replace(".sql", ".txt")}");
 
-            var destinationDirectory = Path.GetDirectoryName(destinationFile);
+            if (_outputFiles == null)
+                _outputFiles = new Dictionary<string, string>();
+
+            if (!_outputFiles.ContainsKey(fileName))
+                _outputFiles.Add(fileName, outputFile);
+
+            var destinationDirectory = Path.GetDirectoryName(outputFile);
             if (!Directory.Exists(destinationDirectory))
                 Directory.CreateDirectory(destinationDirectory);
 
-            File.WriteAllText(destinationFile, _currentCommandOutput);
+            File.WriteAllText(outputFile, _currentCommandOutput);
 
             if (_hasErrors)
                 _filesStatus[fileName] = true;
@@ -165,6 +172,11 @@ namespace RunQueries
         private void btnQuit_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void lbFiles_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            txtOutput.Text = File.ReadAllText(_outputFiles[lbFiles.SelectedItem.ToString()]);
         }
     }
 }
