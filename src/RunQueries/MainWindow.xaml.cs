@@ -30,6 +30,7 @@ namespace RunQueries
         };
 
         private Dictionary<string, string> _files;
+        private Dictionary<string, bool> _filesStatus;
 
         private string _currentCommandOutput;
 
@@ -57,10 +58,19 @@ namespace RunQueries
                 _files.Keys.ToList().ForEach(fileName => ExecuteQuery(fileName, sqlConnection));
             }
 
-            if(_hasErrors)
+            if(_filesStatus.Any(x => x.Value))
             {
                 lblStatus.Content = "Finished with errors";
                 lblStatus.Foreground = new SolidColorBrush(Colors.Red);
+                var filesWithErrors = _filesStatus.Where(x => x.Value).Select(x => x.Key);
+                foreach (var listBoxItem in lbFiles.Items)
+                {
+                    if (filesWithErrors.Contains(listBoxItem.ToString()))
+                    {
+                        var item = lbFiles.ItemContainerGenerator.ContainerFromItem(listBoxItem) as ListBoxItem;
+                        item.Foreground = new SolidColorBrush(Colors.Red);
+                    }
+                }
             }
             else
             {
@@ -71,6 +81,8 @@ namespace RunQueries
 
         private void ExecuteQuery(string fileName, SqlConnection sqlConnection)
         {
+            _hasErrors = false;
+
             var queryString = File.ReadAllText(_files[fileName]);
 
             _currentCommandOutput = string.Empty;
@@ -107,6 +119,9 @@ namespace RunQueries
                 Directory.CreateDirectory(destinationDirectory);
 
             File.WriteAllText(destinationFile, _currentCommandOutput);
+
+            if (_hasErrors)
+                _filesStatus[fileName] = true;
         }
 
         private void SqlConnection_InfoMessage(object sender, SqlInfoMessageEventArgs args)
@@ -136,6 +151,7 @@ namespace RunQueries
                                     .Select(x => new { FileName = x.Substring(x.LastIndexOf("\\") + 1), Path = x })
                                     .OrderBy(x => x.FileName)
                                     .ToDictionary(x => x.FileName, x => x.Path);
+                _filesStatus = _files.ToDictionary(x => x.Key, x => false);
 
                 lbFiles.ItemsSource = _files.Keys;
             }
