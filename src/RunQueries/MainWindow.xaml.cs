@@ -31,6 +31,10 @@ namespace RunQueries
 
         private Dictionary<string, string> _files;
 
+        private string _currentCommandOutput;
+
+        private bool _hasErrors;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -40,6 +44,9 @@ namespace RunQueries
 
         private void btnRunQueries_Click(object sender, RoutedEventArgs e)
         {
+            _hasErrors = false;
+            lblStatus.Content = "Running queries";
+
             string connectionString = _sqlServers[cbServer.SelectedValue.ToString()];
 
             using (var sqlConnection = new SqlConnection(connectionString))
@@ -49,9 +56,18 @@ namespace RunQueries
 
                 _files.Keys.ToList().ForEach(fileName => ExecuteQuery(fileName, sqlConnection));
             }
-        }
 
-        string _currentCommandOutput;
+            if(_hasErrors)
+            {
+                lblStatus.Content = "Finished with errors";
+                lblStatus.Foreground = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                lblStatus.Content = "Finished successfully";
+                lblStatus.Foreground = new SolidColorBrush(Colors.Green);
+            }
+        }
 
         private void ExecuteQuery(string fileName, SqlConnection sqlConnection)
         {
@@ -73,10 +89,14 @@ namespace RunQueries
                         _currentCommandOutput += $"Msg {err.Number}, Level {err.Class}, State {err.State}, Line {err.LineNumber}{Environment.NewLine}";
                         _currentCommandOutput += $"{err.Message}{Environment.NewLine}";
                     }
+
+                    _hasErrors = true;
                 }
                 catch (Exception ex)
                 {
                     _currentCommandOutput += $"{ex.Message}{Environment.NewLine}";
+
+                    _hasErrors = true;
                 }
             }
 
