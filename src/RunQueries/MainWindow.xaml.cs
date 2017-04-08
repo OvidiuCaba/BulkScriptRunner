@@ -176,7 +176,15 @@ namespace RunQueries
 
         private void lbFiles_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_outputFiles == null || !_outputFiles.Any())
+                return;
+
             txtOutput.Text = File.ReadAllText(_outputFiles[lbFiles.SelectedItem.ToString()]);
+        }
+
+        private void lbFiles_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            System.Diagnostics.Process.Start(_files[lbFiles.SelectedItem.ToString()]);
         }
     }
 }
