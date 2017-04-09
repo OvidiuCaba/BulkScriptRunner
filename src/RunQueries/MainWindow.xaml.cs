@@ -46,6 +46,18 @@ namespace RunQueries
 
         private void btnRunQueries_Click(object sender, RoutedEventArgs e)
         {
+            if (_files == null || !_files.Any())
+            {
+                System.Windows.MessageBox.Show("Select a folder with SQL scripts before proceeding.");
+                return;
+            }
+
+            if (cbServer.SelectedValue == null)
+            {
+                System.Windows.MessageBox.Show("Select a server before proceeding.");
+                return;
+            }
+
             _hasErrors = false;
             lblStatus.Content = "Running queries";
 
