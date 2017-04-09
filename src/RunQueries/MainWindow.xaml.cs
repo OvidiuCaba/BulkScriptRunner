@@ -173,6 +173,8 @@ namespace RunQueries
                 _filesStatus = _files.ToDictionary(x => x.Key, x => false);
 
                 lbFiles.ItemsSource = _files.Keys;
+                txtOutput.Text = null;
+                lblStatus.Content = null;
             }
         }
 
